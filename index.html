@@ -56,29 +56,28 @@ nav a { color:white; text-decoration:none; margin-left:15px; font-size:16px; }
 
 <main>
 <h2 id="gall" style="text-align:center; margin-top:20px; color: rgb(94,94,136);">OUR COLLECTION</h2>
-<div class="gallery"></div>
-</main>
+<div class="gallery">
+
+<!-- ITEMS 1 TO 30 -->
+<!-- Each item: image one.jpg → thirty.jpg, names One → Thirty, price 90,000 -->
 
 <script>
-// Product names
-const gallery = document.querySelector('.gallery');
-const names = [
-  "One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten",
-  "Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen","Twenty",
-  "Twenty One","Twenty Two","Twenty Three","Twenty Four","Twenty Five","Twenty Six","Twenty Seven","Twenty Eight","Twenty Nine","Thirty"
+const gallery = document.querySelector('.gallery') || document.body.querySelector('.gallery');
+const itemNames = [
+"One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten",
+"Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen","Twenty",
+"Twenty One","Twenty Two","Twenty Three","Twenty Four","Twenty Five","Twenty Six","Twenty Seven","Twenty Eight","Twenty Nine","Thirty"
 ];
 
-// Generate 30 items dynamically
-for(let i=0; i<30; i++){
-  const div = document.createElement('div');
-  div.classList.add('item');
-  div.dataset.product = names[i];
-  div.dataset.price = 90000;
-  
-  const imageName = names[i].toLowerCase().replace(/ /g,'') + '.jpeg';
-  
-  div.innerHTML = `
-    <img src="my images/${imageName}" alt="${names[i]}">
+itemNames.forEach((name, index)=>{
+    const imgNum = index+1;
+    const itemDiv = document.createElement('div');
+    itemDiv.classList.add('item');
+    itemDiv.dataset.product = name;
+    itemDiv.dataset.price = 90000;
+
+    itemDiv.innerHTML = `
+    <img src="my images/${name.toLowerCase().replace(/ /g,'')}.jpg" alt="${name}">
     <div class="size">
       <button class="size-btn">S</button>
       <button class="size-btn">M</button>
@@ -92,84 +91,88 @@ for(let i=0; i<30; i++){
       <button class="plus">+</button>
     </div>
     <button class="add-to-cart">Add to Cart</button>
-  `;
-  gallery.appendChild(div);
-}
+    `;
+    document.querySelector('.gallery').appendChild(itemDiv);
+});
+</script>
 
-// Cart functionality
-function updateCartPreview(){
-  const cart = JSON.parse(localStorage.getItem('cart')) || [];
-  const cartDropdown = document.getElementById('cart-dropdown');
-  const cartCount = document.getElementById('cart-count');
+</div>
+</main>
 
-  if(cart.length === 0){
-    cartDropdown.innerHTML = '<p>Your cart is empty</p>';
-    cartCount.innerText = 0;
-    return;
+<script>
+function setupCart(){
+  const items = document.querySelectorAll('.item');
+  
+  function updateCartPreview(){
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const cartDropdown = document.getElementById('cart-dropdown');
+    const cartCount = document.getElementById('cart-count');
+
+    if(cart.length === 0){
+      cartDropdown.innerHTML = '<p>Your cart is empty</p>';
+      cartCount.innerText = 0;
+      return;
+    }
+
+    let totalQuantity = 0;
+    let totalPrice = 0;
+    cartDropdown.innerHTML = '';
+
+    cart.forEach(item => {
+      totalQuantity += item.quantity;
+      totalPrice += item.price * item.quantity;
+      const div = document.createElement('div');
+      div.classList.add('cart-item');
+      div.innerText = `${item.product} (${item.size}) x ${item.quantity} - ₦${(item.price*item.quantity).toLocaleString()}`;
+      cartDropdown.appendChild(div);
+    });
+
+    const totalDiv = document.createElement('div');
+    totalDiv.classList.add('cart-total');
+    totalDiv.innerText = `Total: ₦${totalPrice.toLocaleString()}`;
+    cartDropdown.appendChild(totalDiv);
+
+    cartCount.innerText = totalQuantity;
   }
 
-  let totalQuantity = 0;
-  let totalPrice = 0;
-  cartDropdown.innerHTML = '';
-
-  cart.forEach(item => {
-    totalQuantity += item.quantity;
-    totalPrice += item.price * item.quantity;
-    const div = document.createElement('div');
-    div.classList.add('cart-item');
-    div.innerText = `${item.product} (${item.size}) x ${item.quantity} - ₦${(item.price*item.quantity).toLocaleString()}`;
-    cartDropdown.appendChild(div);
-  });
-
-  const totalDiv = document.createElement('div');
-  totalDiv.classList.add('cart-total');
-  totalDiv.innerText = `Total: ₦${totalPrice.toLocaleString()}`;
-  cartDropdown.appendChild(totalDiv);
-
-  cartCount.innerText = totalQuantity;
-}
-
-updateCartPreview();
-
-// Add to cart button functionality
-document.querySelectorAll('.item').forEach(item=>{
-  let size='S';
-  let quantity=1;
-  const sizeButtons = item.querySelectorAll('.size-btn');
-  sizeButtons.forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      sizeButtons.forEach(b=>b.classList.remove('selected'));
-      btn.classList.add('selected');
-      size = btn.innerText;
+  items.forEach(item=>{
+    let size='S';
+    let quantity=1;
+    const sizeButtons = item.querySelectorAll('.size-btn');
+    sizeButtons.forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        sizeButtons.forEach(b=>b.classList.remove('selected'));
+        btn.classList.add('selected');
+        size = btn.innerText;
+      });
+    });
+    const qtyNumber = item.querySelector('.quantity-number');
+    item.querySelector('.plus').addEventListener('click',()=>{
+      quantity++;
+      qtyNumber.innerText = quantity;
+    });
+    item.querySelector('.minus').addEventListener('click',()=>{
+      if(quantity>1) quantity--;
+      qtyNumber.innerText = quantity;
+    });
+    item.querySelector('.add-to-cart').addEventListener('click',()=>{
+      const product = item.dataset.product;
+      const price = Number(item.dataset.price);
+      let cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const existing = cart.find(i=>i.product===product && i.size===size);
+      if(existing){ existing.quantity += quantity; }
+      else { cart.push({product, price, quantity, size}); }
+      localStorage.setItem('cart', JSON.stringify(cart));
+      alert(`${quantity} ${product} (${size}) added to cart!`);
+      quantity=1; qtyNumber.innerText=quantity;
+      updateCartPreview();
     });
   });
-  const qtyNumber = item.querySelector('.quantity-number');
-  item.querySelector('.plus').addEventListener('click',()=>{
-    quantity++;
-    qtyNumber.innerText = quantity;
-  });
-  item.querySelector('.minus').addEventListener('click',()=>{
-    if(quantity>1) quantity--;
-    qtyNumber.innerText = quantity;
-  });
-  item.querySelector('.add-to-cart').addEventListener('click',()=>{
-    const product = item.dataset.product;
-    const price = Number(item.dataset.price);
-    let cart = JSON.parse(localStorage.getItem('cart')) || [];
-    const existing = cart.find(i=>i.product===product && i.size===size);
-    if(existing){ existing.quantity += quantity; }
-    else { cart.push({product, price, quantity, size}); }
-    localStorage.setItem('cart', JSON.stringify(cart));
-    alert(`${quantity} ${product} (${size}) added to cart!`);
-    quantity=1; qtyNumber.innerText=quantity;
-    updateCartPreview();
-  });
-});
 
-// Navigate to checkout on cart button click
-document.getElementById('cart-button').addEventListener('click',()=>{
-  window.location.href='checkout.html';
-});
+  updateCartPreview();
+}
+
+setupCart();
 </script>
 
 </body>
