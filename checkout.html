@@ -1,55 +1,108 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Checkout</title>
 <style>
-body{ font-family:Arial; margin:20px; }
-.order-summary{ border:1px solid #ccc; padding:20px; border-radius:10px; max-width:600px; margin:auto; }
-.order-item{ display:flex; justify-content: space-between; margin-bottom:10px; }
-.total{ font-weight:bold; text-align:right; margin-top:20px; }
-form input, form textarea{ width:100%; margin-bottom:10px; padding:10px; border-radius:5px; border:1px solid #ccc; }
-.place-order-button{ background-color: rgb(94,94,136); color:white; padding:10px 20px; border:none; border-radius:5px; cursor:pointer; }
-.place-order-button:hover{ background-color: rgb(70,70,110); }
+body { font-family: Arial, sans-serif; background:#f7f7f7; padding:20px; margin:0; }
+h2 { text-align:center; color: rgb(94,94,136); margin-bottom:20px; }
+.cart-container { max-width:800px; margin:0 auto; }
+.cart-item { display:flex; flex-wrap:wrap; align-items:center; background:white; margin-bottom:15px; padding:10px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
+.cart-item img { width:100px; height:100px; object-fit:cover; border-radius:8px; margin-right:15px; }
+.item-details { flex:1; }
+.item-details p { margin:5px 0; }
+.quantity { display:flex; align-items:center; margin-top:5px; gap:5px; }
+.total-price { font-weight:bold; margin-left:auto; font-size:16px; }
+.order-summary { background:white; padding:15px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.1); margin-top:20px; text-align:right; font-size:18px; font-weight:bold; }
+.payment-options { margin-top:20px; background:white; padding:15px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
+.payment-options h3 { margin-bottom:10px; }
+.payment-option { margin-bottom:10px; }
+.payment-option input { margin-right:5px; }
+.place-order { margin-top:15px; width:100%; padding:10px; background: rgb(94,94,136); color:white; border:none; border-radius:5px; font-size:16px; cursor:pointer; }
+.place-order:hover { background: rgb(70,70,110); }
+
+@media(max-width:600px){
+  .cart-item { flex-direction: column; align-items:flex-start; }
+  .cart-item img { margin-bottom:10px; }
+  .total-price { margin-left:0; margin-top:5px; }
+}
 </style>
 </head>
 <body>
+
 <h2>Checkout</h2>
+<div class="cart-container" id="cart-container">
+  <!-- Cart items will appear here dynamically -->
+</div>
 
-<div id="cart-container" class="order-summary"></div>
+<div class="order-summary" id="order-total">
+  Total: ₦0
+</div>
 
-<h3>Billing Details</h3>
-<form>
-  <input type="text" placeholder="First Name" required>
-  <input type="text" placeholder="Last Name" required>
-  <input type="text" placeholder="Address" required>
-  <input type="text" placeholder="Phone" required>
-  <input type="email" placeholder="Email" required>
-  <textarea placeholder="Order notes (optional)"></textarea>
-</form>
-
-<button class="place-order-button" id="checkout-btn">Proceed to Payment</button>
+<div class="payment-options">
+  <h3>Payment Options:</h3>
+  <div class="payment-option">
+    <input type="radio" id="paystack" name="payment" value="paystack">
+    <label for="paystack">Paystack</label>
+  </div>
+  <div class="payment-option">
+    <input type="radio" id="flutterwave" name="payment" value="flutterwave">
+    <label for="flutterwave">Flutterwave</label>
+  </div>
+  <div class="payment-option">
+    <input type="radio" id="bank" name="payment" value="bank">
+    <label for="bank">Bank Transfer</label>
+  </div>
+  <button class="place-order">Place Order</button>
+</div>
 
 <script>
+// Load cart from localStorage
+let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
 const cartContainer = document.getElementById('cart-container');
-const cart = JSON.parse(localStorage.getItem('cart')) || [];
-let total = 0;
+const orderTotal = document.getElementById('order-total');
 
-cart.forEach(item=>{
-  const div = document.createElement('div');
-  div.classList.add('order-item');
-  div.innerHTML = `${item.product} (${item.size}) x ${item.quantity} <span>₦${(item.price*item.quantity).toLocaleString()}</span>`;
-  cartContainer.appendChild(div);
-  total += item.price*item.quantity;
-});
+function renderCart() {
+  cartContainer.innerHTML = '';
+  let total = 0;
+  if(cart.length===0){
+    cartContainer.innerHTML = '<p>Your cart is empty</p>';
+    orderTotal.innerText = 'Total: ₦0';
+    return;
+  }
+  cart.forEach(item=>{
+    const itemDiv = document.createElement('div');
+    itemDiv.classList.add('cart-item');
+    itemDiv.innerHTML = `
+      <img src="my images/${item.product.toLowerCase()}.jpeg" alt="${item.product}">
+      <div class="item-details">
+        <p><strong>${item.product}</strong></p>
+        <p>Size: ${item.size}</p>
+        <p>Quantity: ${item.quantity}</p>
+      </div>
+      <div class="total-price">₦${(item.price*item.quantity).toLocaleString()}</div>
+    `;
+    cartContainer.appendChild(itemDiv);
+    total += item.price*item.quantity;
+  });
+  orderTotal.innerText = 'Total: ₦'+total.toLocaleString();
+}
 
-const totalDiv = document.createElement('div');
-totalDiv.classList.add('total');
-totalDiv.innerText = `Total: ₦${total.toLocaleString()}`;
-cartContainer.appendChild(totalDiv);
+renderCart();
 
-document.getElementById('checkout-btn').addEventListener('click', ()=>{
-  alert('Integrate Paystack/Flutterwave here for payment!');
+// Place order button
+document.querySelector('.place-order').addEventListener('click',()=>{
+  if(cart.length===0){ alert('Your cart is empty!'); return; }
+  const payment = document.querySelector('input[name="payment"]:checked');
+  if(!payment){ alert('Please select a payment option!'); return; }
+  alert(`Order placed! Payment method: ${payment.value}`);
+  localStorage.removeItem('cart');
+  cart = [];
+  renderCart();
 });
 </script>
+
 </body>
 </html>
