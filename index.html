@@ -1,30 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tailor Fashion House</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin:0; padding:0; }
-    header { display:flex; justify-content: space-between; align-items:center; background-color: rgb(93,93,131); padding:10px 20px; color:white; }
-    header h1 { margin:0; font-size:32px; }
-    nav a { color:white; text-decoration:none; margin-left:15px; font-size:16px; }
-    .gallery { display:flex; flex-wrap:wrap; justify-content: space-between; padding:20px; }
-    .item { position: relative; width: calc(25% - 10px); margin-bottom: 20px; border-radius:10px; overflow:hidden; }
-    .item img { width:100%; height:300px; object-fit:cover; display:block; border-radius:10px; }
-    .add-to-cart { position:absolute; bottom:15px; left:50%; transform:translateX(-50%); background-color: rgba(94,94,136,0.85); color:white; border:none; padding:10px 15px; border-radius:5px; cursor:pointer; display:none; font-size:16px; }
-    .item:hover .add-to-cart { display:block; }
-    #cart-button { position: fixed; top:20px; right:20px; background-color: rgb(94,94,136); color:white; padding:10px 15px; border-radius:50px; cursor:pointer; font-size:18px; display:flex; align-items:center; gap:5px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); z-index:1000; }
-    #cart-count { background-color:white; color: rgb(94,94,136); border-radius:50%; padding:2px 8px; font-weight:bold; font-size:14px; }
-    #cart-dropdown { display:none; position:absolute; top:45px; right:0; width:250px; background:white; color:black; border:1px solid #ccc; border-radius:8px; padding:10px; box-shadow:0 4px 10px rgba(0,0,0,0.2); z-index:1001; max-height:300px; overflow-y:auto; }
-    #cart-button:hover #cart-dropdown { display:block; }
-    #cart-dropdown .cart-item { display:flex; justify-content:space-between; margin-bottom:8px; font-size:14px; }
-    #cart-dropdown .cart-item:last-child { margin-bottom:0; }
-    #cart-dropdown .cart-total { font-weight:bold; margin-top:10px; text-align:right; font-size:15px; }
-    @media(max-width:992px){ .item{ width: calc(33% - 10px); } }
-    @media(max-width:768px){ .item{ width: calc(50% - 10px); } }
-    @media(max-width:480px){ .item{ width:100%; } }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tailor Fashion House</title>
+<style>
+body { font-family: Arial, sans-serif; margin:0; padding:0; }
+header { display:flex; justify-content: space-between; align-items:center; background-color: rgb(93,93,131); padding:10px 20px; color:white; }
+header h1 { margin:0; font-size:32px; }
+nav a { color:white; text-decoration:none; margin-left:15px; font-size:16px; }
+.gallery { display:flex; flex-wrap:wrap; justify-content: space-between; padding:20px; }
+.item { position: relative; width: calc(25% - 10px); margin-bottom: 20px; border-radius:10px; overflow:hidden; border:1px solid #ccc; padding:10px; }
+.item img { width:100%; height:300px; object-fit:cover; display:block; border-radius:10px; }
+.add-to-cart { position:absolute; bottom:15px; left:50%; transform:translateX(-50%); background-color: rgba(94,94,136,0.85); color:white; border:none; padding:10px 15px; border-radius:5px; cursor:pointer; display:none; font-size:16px; }
+.item:hover .add-to-cart { display:block; }
+
+/* Size selection */
+.size { display:flex; justify-content:center; margin:10px 0; gap:5px; }
+.size button { background:white; border:1px solid #ccc; padding:5px 10px; cursor:pointer; border-radius:5px; }
+.size button.selected { background: rgb(94,94,136); color:white; }
+
+/* Quantity selection */
+.quantity { display:flex; justify-content:center; align-items:center; margin-bottom:10px; gap:5px; }
+.quantity button { padding:5px 10px; cursor:pointer; border-radius:5px; border:1px solid #ccc; background:white; }
+.quantity-number { width:25px; text-align:center; display:inline-block; }
+
+#cart-button { position: fixed; top:20px; right:20px; background-color: rgb(94,94,136); color:white; padding:10px 15px; border-radius:50px; cursor:pointer; font-size:18px; display:flex; align-items:center; gap:5px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); z-index:1000; }
+#cart-count { background-color:white; color: rgb(94,94,136); border-radius:50%; padding:2px 8px; font-weight:bold; font-size:14px; }
+#cart-dropdown { display:none; position:absolute; top:45px; right:0; width:250px; background:white; color:black; border:1px solid #ccc; border-radius:8px; padding:10px; box-shadow:0 4px 10px rgba(0,0,0,0.2); z-index:1001; max-height:300px; overflow-y:auto; }
+#cart-button:hover #cart-dropdown { display:block; }
+#cart-dropdown .cart-item { display:flex; justify-content:space-between; margin-bottom:8px; font-size:14px; }
+#cart-dropdown .cart-total { font-weight:bold; margin-top:10px; text-align:right; font-size:15px; }
+
+@media(max-width:992px){ .item{ width: calc(33% - 10px); } }
+@media(max-width:768px){ .item{ width: calc(50% - 10px); } }
+@media(max-width:480px){ .item{ width:100%; } }
+</style>
 </head>
 <body>
 
@@ -42,30 +53,34 @@
 </div>
 
 <main>
-  <h2 id="gall" style="text-align:center; margin-top:20px; color: rgb(94,94,136);">OUR COLLECTION</h2>
-  <div class="gallery">
-    <div class="item" data-product="Eighteen" data-price="50000">
-      <img src="my images/eighteen.jpg" alt="Eighteen">
-      <button class="add-to-cart">Add to Cart</button>
-    </div>
-    <div class="item" data-product="Two" data-price="45000">
-      <img src="my images/two.jpeg" alt="Two">
-      <button class="add-to-cart">Add to Cart</button>
-    </div>
-    <div class="item" data-product="Twenty Four" data-price="60000">
-      <img src="my images/tweenty four.jpeg" alt="Twenty Four">
-      <button class="add-to-cart">Add to Cart</button>
-    </div>
-    <div class="item" data-product="Twenty" data-price="55000">
-      <img src="my images/tweenty.jpg" alt="Twenty">
-      <button class="add-to-cart">Add to Cart</button>
-    </div>
-    <!-- Add more products similarly -->
+<h2 id="gall" style="text-align:center; margin-top:20px; color: rgb(94,94,136);">OUR COLLECTION</h2>
+<div class="gallery">
+
+<!-- Example: Repeat this for 1 → 30 -->
+<div class="item" data-product="One" data-price="90000">
+  <img src="my images/one.jpeg" alt="One">
+  <div class="size">
+    <button class="size-btn">S</button>
+    <button class="size-btn">M</button>
+    <button class="size-btn">L</button>
+    <button class="size-btn">XL</button>
+    <button class="size-btn">XXL</button>
   </div>
+  <div class="quantity">
+    <button class="minus">-</button>
+    <span class="quantity-number">1</span>
+    <button class="plus">+</button>
+  </div>
+  <button class="add-to-cart">Add to Cart</button>
+</div>
+
+<!-- Repeat similar blocks for Two → Thirty with corresponding image names -->
+<!-- Make sure each data-product and src is correct, price=90000 -->
+
+</div>
 </main>
 
 <script>
-// Function to update mini-cart and count
 function updateCartPreview(){
   const cart = JSON.parse(localStorage.getItem('cart')) || [];
   const cartDropdown = document.getElementById('cart-dropdown');
@@ -102,25 +117,44 @@ function updateCartPreview(){
 updateCartPreview();
 
 // Add to Cart functionality
-const addButtons = document.querySelectorAll('.add-to-cart');
-addButtons.forEach(button => {
-  button.addEventListener('click', () => {
-    const itemDiv = button.parentElement;
-    const product = itemDiv.dataset.product;
-    const price = Number(itemDiv.dataset.price);
+const items = document.querySelectorAll('.item');
+items.forEach(item => {
+  let size = 'S';
+  let quantity = 1;
 
+  const sizeButtons = item.querySelectorAll('.size-btn');
+  sizeButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      sizeButtons.forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      size = btn.innerText;
+    });
+  });
+
+  const qtyNumber = item.querySelector('.quantity-number');
+  item.querySelector('.plus').addEventListener('click', () => {
+    quantity++;
+    qtyNumber.innerText = quantity;
+  });
+  item.querySelector('.minus').addEventListener('click', () => {
+    if(quantity>1) quantity--;
+    qtyNumber.innerText = quantity;
+  });
+
+  item.querySelector('.add-to-cart').addEventListener('click', () => {
+    const product = item.dataset.product;
+    const price = Number(item.dataset.price);
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
-    const existing = cart.find(i => i.product === product);
-    if(existing){ existing.quantity +=1; } 
-    else { cart.push({product, price, quantity:1, size:'Default'}); }
-
+    const existing = cart.find(i => i.product === product && i.size === size);
+    if(existing){ existing.quantity += quantity; } 
+    else { cart.push({product, price, quantity, size}); }
     localStorage.setItem('cart', JSON.stringify(cart));
-    alert(`${product} added to cart!`);
+    alert(`${quantity} ${product} (${size}) added to cart!`);
+    quantity = 1; qtyNumber.innerText = quantity;
     updateCartPreview();
   });
 });
 
-// Click on floating cart → go to checkout
 document.getElementById('cart-button').addEventListener('click', ()=>{
   window.location.href = 'checkout.html';
 });
