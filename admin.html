@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel - Femi Couture</title>
+<style>
+body { font-family: Arial, sans-serif; margin:20px; background:#f5f5f5; }
+h2 { text-align:center; }
+button { cursor:pointer; border:none; border-radius:5px; padding:5px 10px; }
+.logout-btn { background:red; color:white; float:right; }
+.admin-box { background:white; padding:15px; border-radius:10px; margin-bottom:20px; box-shadow:0 0 10px rgba(0,0,0,0.1); }
+.admin-box input { margin:5px 0; padding:5px; width:90%; }
+.admin-box button { margin-top:5px; margin-right:5px; background-color: rgb(94,94,136); color:white; }
+#productList div, #orderList div { margin-bottom:10px; padding:5px; border-bottom:1px solid #ccc; display:flex; justify-content:space-between; flex-wrap:wrap; }
+#productList div input { width: 120px; margin-right:5px; }
+</style>
+</head>
+<body>
+
+<script>
+// PROTECT ADMIN PAGE
+if(localStorage.getItem('isAdmin') !== 'true'){
+  window.location.href='admin-login.html';
+}
+</script>
+
+<h2>Femi Couture - Admin Dashboard</h2>
+<button class="logout-btn" onclick="logout()">Logout</button>
+
+<div class="admin-box">
+<h3>Add New Product</h3>
+<input type="text" id="newName" placeholder="Product Name">
+<input type="text" id="newImg" placeholder="Image Name (e.g., one.jpg)">
+<input type="number" id="newPrice" placeholder="Price">
+<button onclick="addProduct()">Add Product</button>
+</div>
+
+<div class="admin-box">
+<h3>Manage Products</h3>
+<div id="productList"></div>
+</div>
+
+<div class="admin-box">
+<h3>Orders</h3>
+<div id="orderList"></div>
+</div>
+
+<script>
+// LOGOUT
+function logout() {
+  localStorage.removeItem('isAdmin');
+  window.location.href = 'admin-login.html';
+}
+
+// LOAD PRODUCTS
+function loadProducts(){
+  let products = JSON.parse(localStorage.getItem('extraProducts')) || [];
+  const list = document.getElementById('productList');
+  list.innerHTML='';
+  products.forEach((p,i)=>{
+    const div = document.createElement('div');
+    div.innerHTML = `
+      <span><b>${p.name}</b></span>
+      <input type="text" value="${p.img}" id="img${i}">
+      <input type="number" value="${p.price}" id="price${i}">
+      <button onclick="updateProduct(${i})">Update</button>
+      <button onclick="removeProduct(${i})">Remove</button>
+    `;
+    list.appendChild(div);
+  });
+}
+
+// ADD PRODUCT
+function addProduct(){
+  let name = document.getElementById('newName').value;
+  let img = document.getElementById('newImg').value;
+  let price = parseInt(document.getElementById('newPrice').value);
+  if(!name || !img || !price) return alert('All fields required!');
+  let products = JSON.parse(localStorage.getItem('extraProducts')) || [];
+  products.push({name,img,price});
+  localStorage.setItem('extraProducts', JSON.stringify(products));
+  loadProducts();
+}
+
+// UPDATE PRODUCT
+function updateProduct(i){
+  let products = JSON.parse(localStorage.getItem('extraProducts')) || [];
+  products[i].img = document.getElementById('img'+i).value;
+  products[i].price = parseInt(document.getElementById('price'+i).value);
+  localStorage.setItem('extraProducts', JSON.stringify(products));
+  loadProducts();
+}
+
+// REMOVE PRODUCT
+function removeProduct(i){
+  let products = JSON.parse(localStorage.getItem('extraProducts')) || [];
+  products.splice(i,1);
+  localStorage.setItem('extraProducts', JSON.stringify(products));
+  loadProducts();
+}
+
+// LOAD ORDERS
+function loadOrders(){
+  let orders = JSON.parse(localStorage.getItem('cart')) || [];
+  const list = document.getElementById('orderList');
+  list.innerHTML='';
+  orders.forEach((o,i)=>{
+    const div = document.createElement('div');
+    div.innerHTML = `
+      <span><b>${o.name}</b> - Size: ${o.size}, Qty: ${o.qty}, ₦${o.price.toLocaleString()}</span>
+      <button onclick="removeOrder(${i})">Remove Order</button>
+    `;
+    list.appendChild(div);
+  });
+}
+
+// REMOVE ORDER
+function removeOrder(i){
+  let orders = JSON.parse(localStorage.getItem('cart')) || [];
+  orders.splice(i,1);
+  localStorage.setItem('cart', JSON.stringify(orders));
+  loadOrders();
+}
+
+// INITIAL LOAD
+loadProducts();
+loadOrders();
+</script>
+
+</body>
+</html>
