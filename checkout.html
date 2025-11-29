@@ -2,15 +2,25 @@
 <html>
 <head>
 <title>Checkout - Femi Couture</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 body { font-family: Arial; margin:20px; }
 .order-summary { max-width:600px; margin:0 auto; padding:20px; border:1px solid #ccc; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1); }
-.order-item { display:flex; margin-bottom:15px; }
+.order-item { display:flex; margin-bottom:15px; flex-wrap:wrap; border-bottom:1px solid #eee; padding-bottom:10px; }
 .order-item img { width:100px; height:100px; object-fit:cover; border-radius:10px; margin-right:20px; }
-.order-details { flex:1; }
-.order-total { font-weight:bold; margin-top:10px; }
+.order-details { flex:1; min-width:200px; }
+.order-details p { margin:5px 0; }
+.order-total { font-weight:bold; margin-top:10px; font-size:18px; text-align:right; }
 .payment-option { margin-top:20px; }
-.place-order { margin-top:10px; width:100%; padding:10px; background: rgb(94,94,136); color:white; border:none; border-radius:5px; cursor:pointer; }
+.payment-option input { margin-right:5px; }
+.place-order { margin-top:10px; width:100%; padding:10px; background: rgb(94,94,136); color:white; border:none; border-radius:5px; cursor:pointer; font-size:16px; }
+
+/* Responsive */
+@media(max-width:768px){
+  .order-item { flex-direction:column; align-items:flex-start; }
+  .order-item img { margin-bottom:10px; width:100%; height:auto; }
+  .order-total { text-align:left; }
+}
 </style>
 </head>
 <body>
