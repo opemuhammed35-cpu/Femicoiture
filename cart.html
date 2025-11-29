@@ -1,86 +1,71 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cart - Femi Couture</title>
 <style>
-body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
-header { padding: 15px; background-color: rgb(94,94,136); color: white; display: flex; justify-content: space-between; align-items: center; }
-header h2 { margin: 0; }
-.cart-container { padding: 20px; max-width: 800px; margin: auto; }
-.cart-item { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
-.cart-item img { width: 80px; height: 80px; object-fit: cover; border-radius: 5px; margin-right: 15px; }
-.cart-details { flex: 1; }
-.cart-controls button { margin: 0 5px; padding: 5px 10px; border-radius: 5px; cursor: pointer; border: none; background-color: #ddd; }
-.total { text-align: right; font-size: 20px; font-weight: bold; margin-top: 20px; }
-.checkout-btn { background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px; }
+body { font-family: Arial; margin:20px; }
+.cart-item { display:flex; align-items:center; margin-bottom:15px; border:1px solid #ccc; padding:10px; border-radius:10px; }
+.cart-item img { width:100px; height:100px; object-fit:cover; margin-right:20px; border-radius:10px; }
+.details { flex:1; }
+.details p { margin:5px 0; }
+.qty-controls { display:flex; align-items:center; }
+.qty-controls button { padding:5px 10px; margin:0 5px; cursor:pointer; }
+.remove-btn { background:red; color:white; border:none; padding:5px 10px; cursor:pointer; border-radius:5px; }
+.checkout-btn { margin-top:20px; width:100%; padding:10px; background: rgb(94,94,136); color:white; border:none; border-radius:5px; cursor:pointer; }
 </style>
 </head>
 <body>
 
-<header>
-  <h2>Femi Couture Cart</h2>
-  <a href="index.html" style="color:white;text-decoration:none;">🏠 Home</a>
-</header>
-
-<div class="cart-container" id="cartContainer"></div>
-<div class="total" id="totalPrice"></div>
-<button class="checkout-btn" onclick="checkout()">Proceed to Checkout</button>
+<h2>Your Cart</h2>
+<div id="cart-container"></div>
+<button class="checkout-btn" onclick="goToCheckout()">Proceed to Checkout</button>
 
 <script>
-function loadCart(){
-  const container = document.getElementById('cartContainer');
-  container.innerHTML = '';
-  let cart = JSON.parse(localStorage.getItem('cart')) || [];
-  let total = 0;
-
-  cart.forEach((item, index) => {
-    const itemDiv = document.createElement('div');
-    itemDiv.classList.add('cart-item');
-    itemDiv.innerHTML = `
-      <img src="${item.img}">
-      <div class="cart-details">
-        <p><b>${item.name}</b></p>
+function renderCart(){
+  const container=document.getElementById('cart-container');
+  const cart=JSON.parse(localStorage.getItem('cart'))||[];
+  container.innerHTML='';
+  cart.forEach((item,index)=>{
+    const div=document.createElement('div');
+    div.className='cart-item';
+    div.innerHTML=`
+      <img src="${item.img}" alt="${item.name}">
+      <div class="details">
+        <p><strong>${item.name}</strong></p>
         <p>Size: ${item.size}</p>
-        <p>Qty: ${item.qty}</p>
+        <div class="qty-controls">
+          <button class="minus">-</button>
+          <span class="qty">${item.qty}</span>
+          <button class="plus">+</button>
+        </div>
         <p>₦${(item.price*item.qty).toLocaleString()}</p>
-      </div>
-      <div class="cart-controls">
-        <button onclick="changeQty(${index},-1)">-</button>
-        <button onclick="changeQty(${index},1)">+</button>
-        <button onclick="removeItem(${index})">Remove</button>
+        <button class="remove-btn">Remove</button>
       </div>
     `;
-    container.appendChild(itemDiv);
-    total += item.price * item.qty;
+    container.appendChild(div);
+
+    const minus=div.querySelector('.minus');
+    const plus=div.querySelector('.plus');
+    const qtySpan=div.querySelector('.qty');
+    const remove=div.querySelector('.remove-btn');
+
+    minus.addEventListener('click',()=>{
+      if(item.qty>1){ item.qty--; qtySpan.innerText=item.qty; localStorage.setItem('cart',JSON.stringify(cart)); renderCart(); }
+    });
+    plus.addEventListener('click',()=>{
+      item.qty++; qtySpan.innerText=item.qty; localStorage.setItem('cart',JSON.stringify(cart)); renderCart();
+    });
+    remove.addEventListener('click',()=>{
+      cart.splice(index,1);
+      localStorage.setItem('cart',JSON.stringify(cart));
+      renderCart();
+    });
   });
-  document.getElementById('totalPrice').innerText = 'Total: ₦' + total.toLocaleString();
-}
-loadCart();
-
-function changeQty(i, val){
-  let cart = JSON.parse(localStorage.getItem('cart')) || [];
-  cart[i].qty += val;
-  if(cart[i].qty < 1) cart[i].qty = 1;
-  localStorage.setItem('cart', JSON.stringify(cart));
-  loadCart();
 }
 
-function removeItem(i){
-  let cart = JSON.parse(localStorage.getItem('cart')) || [];
-  cart.splice(i,1);
-  localStorage.setItem('cart', JSON.stringify(cart));
-  loadCart();
-}
+function goToCheckout(){ window.location='checkout.html'; }
 
-function checkout(){
-  if(!localStorage.getItem('cart') || JSON.parse(localStorage.getItem('cart')).length===0){
-    alert('Cart is empty!');
-    return;
-  }
-  window.location.href='checkout.html'; // Redirect to your checkout page
-}
+renderCart();
 </script>
 
 </body>
