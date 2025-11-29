@@ -3,38 +3,32 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Femi Couture</title>
+<title>Femi Couture - Shop</title>
 <style>
-body { font-family: Arial, sans-serif; margin:0; padding:0; }
-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  background-color: rgb(94,94,136);
-  color:white;
-  padding:15px;
-  flex-wrap:wrap;
-}
+body { font-family: Arial; margin:0; padding:0; }
+header { display:flex; justify-content:space-between; align-items:center; background-color: rgb(94,94,136); color:white; padding:15px; flex-wrap:wrap; }
 header h1 { margin:0; font-size:28px; }
 header nav a { color:white; text-decoration:none; margin-left:15px; font-size:16px; }
 .search-bar { margin:10px 0; text-align:center; }
 .search-bar input { width:80%; max-width:400px; padding:8px; font-size:16px; border-radius:5px; border:1px solid #ccc; }
-
 .gallery { display:flex; flex-wrap: wrap; margin:20px; justify-content:space-between; }
-.item { width:100%; margin-bottom:20px; border:1px solid #ccc; border-radius:10px; overflow:hidden; padding:10px; box-sizing:border-box; }
-.item img { width:100%; height:250px; object-fit:cover; border-radius:10px; cursor:pointer; }
-.item h3 { margin:10px 0 5px 0; }
-.size button { margin:0 5px; padding:5px 10px; cursor:pointer; border:none; border-radius:5px; background:#eee; }
+.item { width:100%; margin-bottom:20px; border:1px solid #ccc; border-radius:10px; overflow:hidden; padding:10px; box-sizing:border-box; display:flex; flex-direction:column; }
+.item img { width:100%; height:200px; object-fit:cover; border-radius:10px; cursor:pointer; }
+.item h3 { margin:10px 0 5px 0; font-size:18px; text-align:center; }
+.item p { text-align:center; font-size:16px; margin:5px 0; }
+.size { text-align:center; margin-top:5px; }
+.size button { margin:0 3px; padding:5px 8px; cursor:pointer; border:none; border-radius:5px; background:#eee; font-size:14px; }
 .size button.selected { background:#5e5e88; color:white; }
-.add { margin-top:10px; display:flex; align-items:center; }
+.add { margin-top:10px; display:flex; justify-content:center; align-items:center; }
 .add button { border:none; background:none; font-size:18px; padding:5px 10px; cursor:pointer; }
-.cart-btn { margin-top:10px; width:100%; padding:10px; background: rgb(94,94,136); color:white; border:none; border-radius:5px; cursor:pointer; }
-@media(min-width:768px){ .item { width:48%; } }
-@media(min-width:1200px){ .item { width:23%; } }
-
+.qty { margin:0 10px; font-size:16px; }
+.cart-btn { margin-top:10px; width:100%; padding:10px; background: rgb(94,94,136); color:white; border:none; border-radius:5px; cursor:pointer; font-size:16px; }
 footer { text-align:center; font-family: Arial, Helvetica, sans-serif; padding:20px; background-color:#f5f5f5; border-top:1px solid #ccc; }
-footer .con img { height:50px; width:50px; border-radius:50%; margin:5px; }
-footer .lin a { margin:0 10px; color: rgb(94,94,136); text-decoration:none; font-weight:bold; }
+
+/* Responsive */
+@media(min-width:600px){ .item { width:48%; } }
+@media(min-width:992px){ .item { width:31%; } }
+@media(min-width:1200px){ .item { width:23%; } }
 </style>
 </head>
 <body>
@@ -43,7 +37,7 @@ footer .lin a { margin:0 10px; color: rgb(94,94,136); text-decoration:none; font
   <h1>Femi Couture</h1>
   <nav>
     <a href="#">Home</a>
-    <a href="#foot">Contact</a>
+    <a href="cart.html">Cart</a>
   </nav>
 </header>
 
@@ -55,46 +49,23 @@ footer .lin a { margin:0 10px; color: rgb(94,94,136); text-decoration:none; font
   <div class="gallery" id="gallery"></div>
 </main>
 
-<footer id="foot">
-  <div class="con">
-    <a href="whatsapp"><img src="Whatsapp.png" alt="WhatsApp"></a>
-    <a href="gmail"><img src="mail.png" alt="Email"></a>
-    <a href="instagram"><img src="ig.png" alt="Instagram"></a>
-    <a href="facebook"><img src="fb.png" alt="Facebook"></a>
-  </div>
-  <div class="lin">
-    <a href="index.html">HOME</a>
-    <a href="#foot">CONTACT</a>
-    <a href="admin-login.html">Admin Login</a>
-  </div>
-  <p>&copy; 2025 Femi Couture. All Rights Reserved.</p>
-</footer>
+<footer>Femi Couture &copy; 2025</footer>
 
 <script>
 // PRODUCTS
-const products = [];
-for(let i=1;i<=30;i++){
-  let name='';
-  switch(i){
-    case 1: name='one'; break; case 2: name='two'; break; case 3: name='three'; break;
-    case 4: name='four'; break; case 5: name='five'; break; case 6: name='six'; break;
-    case 7: name='seven'; break; case 8: name='eight'; break; case 9: name='nine'; break;
-    case 10: name='ten'; break; case 11: name='eleven'; break; case 12: name='twelve'; break;
-    case 13: name='thirteen'; break; case 14: name='fourteen'; break; case 15: name='fifteen'; break;
-    case 16: name='sixteen'; break; case 17: name='seventeen'; break; case 18: name='eighteen'; break;
-    case 19: name='nineteen'; break; case 20: name='twenty'; break; case 21: name='twenty one'; break;
-    case 22: name='twenty two'; break; case 23: name='twenty three'; break; case 24: name='twenty four'; break;
-    case 25: name='twenty five'; break; case 26: name='twenty six'; break; case 27: name='twenty seven'; break;
-    case 28: name='twenty eight'; break; case 29: name='twenty nine'; break; case 30: name='thirty'; break;
-  }
-  products.push({name,img:`${name}.jpg`,price:90000});
-}
+const products=[];
+const names=[
+'one','two','three','four','five','six','seven','eight','nine','ten',
+'eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen','twenty',
+'twenty one','twenty two','twenty three','twenty four','twenty five','twenty six','twenty seven','twenty eight','twenty nine','thirty'
+];
+names.forEach(name=>products.push({name,img:`${name}.jpg`,price:90000}));
 
-const gallery = document.getElementById('gallery');
+const gallery=document.getElementById('gallery');
 
 function displayProducts(list){
   gallery.innerHTML='';
-  list.forEach((p,i)=>{
+  list.forEach(p=>{
     const div=document.createElement('div');
     div.classList.add('item');
     div.innerHTML=`
@@ -113,8 +84,7 @@ function displayProducts(list){
     `;
     gallery.appendChild(div);
 
-    // SIZE
-    const sizeBtns = div.querySelectorAll('.size button');
+    const sizeBtns=div.querySelectorAll('.size button');
     let selectedSize='S';
     sizeBtns.forEach(btn=>{
       btn.addEventListener('click',()=>{
@@ -125,13 +95,11 @@ function displayProducts(list){
     });
     sizeBtns[0].classList.add('selected');
 
-    // QUANTITY
     const qtySpan=div.querySelector('.qty');
     let qty=1;
     div.querySelector('.plus').addEventListener('click',()=>{ qty++; qtySpan.innerText=qty; });
     div.querySelector('.minus').addEventListener('click',()=>{ if(qty>1){ qty--; qtySpan.innerText=qty; }});
 
-    // ADD TO CART
     div.querySelector('.cart-btn').addEventListener('click',()=>{
       const cart=JSON.parse(localStorage.getItem('cart'))||[];
       cart.push({name:p.name,img:p.img,price:p.price,qty:qty,size:selectedSize});
@@ -141,10 +109,8 @@ function displayProducts(list){
   });
 }
 
-// INITIAL DISPLAY
 displayProducts(products);
 
-// SEARCH FUNCTIONALITY
 document.getElementById('searchInput').addEventListener('input',function(){
   const val=this.value.toLowerCase();
   const filtered=products.filter(p=>p.name.toLowerCase().includes(val));
