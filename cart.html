@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cart - Femi Couture</title>
+<style>
+body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+header { padding: 15px; background-color: rgb(94,94,136); color: white; display: flex; justify-content: space-between; align-items: center; }
+header h2 { margin: 0; }
+.cart-container { padding: 20px; max-width: 800px; margin: auto; }
+.cart-item { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
+.cart-item img { width: 80px; height: 80px; object-fit: cover; border-radius: 5px; margin-right: 15px; }
+.cart-details { flex: 1; }
+.cart-controls button { margin: 0 5px; padding: 5px 10px; border-radius: 5px; cursor: pointer; border: none; background-color: #ddd; }
+.total { text-align: right; font-size: 20px; font-weight: bold; margin-top: 20px; }
+.checkout-btn { background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h2>Femi Couture Cart</h2>
+  <a href="index.html" style="color:white;text-decoration:none;">🏠 Home</a>
+</header>
+
+<div class="cart-container" id="cartContainer"></div>
+<div class="total" id="totalPrice"></div>
+<button class="checkout-btn" onclick="checkout()">Proceed to Checkout</button>
+
+<script>
+function loadCart(){
+  const container = document.getElementById('cartContainer');
+  container.innerHTML = '';
+  let cart = JSON.parse(localStorage.getItem('cart')) || [];
+  let total = 0;
+
+  cart.forEach((item, index) => {
+    const itemDiv = document.createElement('div');
+    itemDiv.classList.add('cart-item');
+    itemDiv.innerHTML = `
+      <img src="${item.img}">
+      <div class="cart-details">
+        <p><b>${item.name}</b></p>
+        <p>Size: ${item.size}</p>
+        <p>Qty: ${item.qty}</p>
+        <p>₦${(item.price*item.qty).toLocaleString()}</p>
+      </div>
+      <div class="cart-controls">
+        <button onclick="changeQty(${index},-1)">-</button>
+        <button onclick="changeQty(${index},1)">+</button>
+        <button onclick="removeItem(${index})">Remove</button>
+      </div>
+    `;
+    container.appendChild(itemDiv);
+    total += item.price * item.qty;
+  });
+  document.getElementById('totalPrice').innerText = 'Total: ₦' + total.toLocaleString();
+}
+loadCart();
+
+function changeQty(i, val){
+  let cart = JSON.parse(localStorage.getItem('cart')) || [];
+  cart[i].qty += val;
+  if(cart[i].qty < 1) cart[i].qty = 1;
+  localStorage.setItem('cart', JSON.stringify(cart));
+  loadCart();
+}
+
+function removeItem(i){
+  let cart = JSON.parse(localStorage.getItem('cart')) || [];
+  cart.splice(i,1);
+  localStorage.setItem('cart', JSON.stringify(cart));
+  loadCart();
+}
+
+function checkout(){
+  if(!localStorage.getItem('cart') || JSON.parse(localStorage.getItem('cart')).length===0){
+    alert('Cart is empty!');
+    return;
+  }
+  window.location.href='checkout.html'; // Redirect to your checkout page
+}
+</script>
+
+</body>
+</html>
