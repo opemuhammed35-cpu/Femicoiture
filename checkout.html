@@ -1,119 +1,59 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Checkout - Femi Couture</title>
 <style>
-body { font-family: Arial, sans-serif; margin:0; padding:0; }
-header { padding: 15px; background-color: rgb(94,94,136); color: white; display:flex; justify-content:space-between; align-items:center; }
-header h2 { margin:0; }
-header a { color:white; text-decoration:none; }
-.container { max-width: 700px; margin:20px auto; padding:15px; border:1px solid #ccc; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1); }
-h3 { text-align:center; }
-input, textarea, select { width:100%; padding:8px; margin:5px 0 15px 0; border:1px solid #ccc; border-radius:5px; }
-.cart-item { display:flex; margin-bottom:10px; border-bottom:1px solid #ccc; padding-bottom:10px; align-items:center; }
-.cart-item img { width:80px; height:80px; object-fit:cover; border-radius:5px; margin-right:15px; }
-.cart-details { flex:1; }
-.order-total { font-weight:bold; text-align:right; margin-top:15px; font-size:18px; }
-.payment-option { margin-bottom:10px; }
-.place-order-btn { background-color: #4CAF50; color:white; border:none; padding:10px 20px; border-radius:5px; cursor:pointer; width:100%; font-size:16px; }
-.place-order-btn:hover { background-color:#3e8e41; }
+body { font-family: Arial; margin:20px; }
+.order-summary { max-width:600px; margin:0 auto; padding:20px; border:1px solid #ccc; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1); }
+.order-item { display:flex; margin-bottom:15px; }
+.order-item img { width:100px; height:100px; object-fit:cover; border-radius:10px; margin-right:20px; }
+.order-details { flex:1; }
+.order-total { font-weight:bold; margin-top:10px; }
+.payment-option { margin-top:20px; }
+.place-order { margin-top:10px; width:100%; padding:10px; background: rgb(94,94,136); color:white; border:none; border-radius:5px; cursor:pointer; }
 </style>
 </head>
 <body>
 
-<header>
-  <h2>Femi Couture Checkout</h2>
-  <a href="cart.html">🛒 Cart</a>
-</header>
-
-<div class="container">
-  <h3>Billing Details</h3>
-  <form id="billingForm">
-    <input type="text" id="first" placeholder="First Name" required>
-    <input type="text" id="last" placeholder="Last Name" required>
-    <input type="text" id="country" placeholder="Country/Region" required>
-    <input type="text" id="address" placeholder="Street Address" required>
-    <input type="text" id="city" placeholder="Town/City" required>
-    <input type="text" id="state" placeholder="State" required>
-    <input type="text" id="phone" placeholder="Phone" required>
-    <input type="email" id="email" placeholder="Email Address" required>
-    <textarea id="notes" placeholder="Order notes (optional)"></textarea>
-
-    <h3>Your Order</h3>
-    <div id="orderSummary"></div>
-    <div class="order-total" id="totalPrice"></div>
-
-    <h3>Payment Method</h3>
-    <div class="payment-option">
-      <input type="radio" name="payment" value="Paystack" checked> Paystack
-    </div>
-    <div class="payment-option">
-      <input type="radio" name="payment" value="Flutterwave"> Flutterwave
-    </div>
-    <div class="payment-option">
-      <input type="radio" name="payment" value="Bank Transfer"> Bank Transfer
-    </div>
-
-    <button type="submit" class="place-order-btn">Place Order</button>
-  </form>
-</div>
+<h2>Checkout</h2>
+<div class="order-summary" id="order-summary"></div>
 
 <script>
-// LOAD CART ITEMS
-function loadCart(){
-  let cart = JSON.parse(localStorage.getItem('cart')) || [];
-  const container = document.getElementById('orderSummary');
-  container.innerHTML='';
-  let total=0;
+const cart = JSON.parse(localStorage.getItem('cart')) || [];
+const summary = document.getElementById('order-summary');
+let total = 0;
 
-  cart.forEach((item)=>{
-    const div = document.createElement('div');
-    div.classList.add('cart-item');
-    div.innerHTML=`
-      <img src="${item.img}">
-      <div class="cart-details">
-        <p><b>${item.name}</b></p>
-        <p>Size: ${item.size}</p>
-        <p>Qty: ${item.qty}</p>
-        <p>₦${(item.price*item.qty).toLocaleString()}</p>
-      </div>
-    `;
-    container.appendChild(div);
-    total += item.price*item.qty;
-  });
-  document.getElementById('totalPrice').innerText = 'Total: ₦'+total.toLocaleString();
-}
-
-loadCart();
-
-// PLACE ORDER
-document.getElementById('billingForm').addEventListener('submit', function(e){
-  e.preventDefault();
-
-  let cart = JSON.parse(localStorage.getItem('cart')) || [];
-  if(cart.length===0){ alert('Cart is empty!'); return; }
-
-  const billingDetails = {
-    first: document.getElementById('first').value,
-    last: document.getElementById('last').value,
-    country: document.getElementById('country').value,
-    address: document.getElementById('address').value,
-    city: document.getElementById('city').value,
-    state: document.getElementById('state').value,
-    phone: document.getElementById('phone').value,
-    email: document.getElementById('email').value,
-    notes: document.getElementById('notes').value,
-    payment: document.querySelector('input[name="payment"]:checked').value,
-    order: cart
-  };
-
-  console.log('Order Placed:', billingDetails);
-  alert('Thank you! Your order has been placed.');
-  localStorage.removeItem('cart');
-  window.location.href='index.html';
+cart.forEach(item=>{
+  total += item.price*item.qty;
+  const div=document.createElement('div');
+  div.classList.add('order-item');
+  div.innerHTML=`
+    <img src="${item.img}" alt="${item.name}">
+    <div class="order-details">
+      <p><strong>${item.name}</strong></p>
+      <p>Size: ${item.size}</p>
+      <p>Qty: ${item.qty}</p>
+      <p>Price: ₦${(item.price*item.qty).toLocaleString()}</p>
+    </div>
+  `;
+  summary.appendChild(div);
 });
+
+const totalDiv=document.createElement('div');
+totalDiv.classList.add('order-total');
+totalDiv.innerHTML=`Total: ₦${total.toLocaleString()}`;
+summary.appendChild(totalDiv);
+
+const payDiv=document.createElement('div');
+payDiv.classList.add('payment-option');
+payDiv.innerHTML=`
+  <p>Select Payment Method:</p>
+  <input type="radio" name="pay" id="paystack"><label for="paystack">Paystack</label><br>
+  <input type="radio" name="pay" id="flutterwave"><label for="flutterwave">Flutterwave</label><br>
+  <input type="radio" name="pay" id="bank"><label for="bank">Bank Transfer</label><br>
+  <button class="place-order">Place Order</button>
+`;
+summary.appendChild(payDiv);
 </script>
 
 </body>
