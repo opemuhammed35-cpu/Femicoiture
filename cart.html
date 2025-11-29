@@ -2,16 +2,24 @@
 <html>
 <head>
 <title>Cart - Femi Couture</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 body { font-family: Arial; margin:20px; }
-.cart-item { display:flex; align-items:center; margin-bottom:15px; border:1px solid #ccc; padding:10px; border-radius:10px; }
+.cart-item { display:flex; align-items:center; margin-bottom:15px; border:1px solid #ccc; padding:10px; border-radius:10px; flex-wrap:wrap; }
 .cart-item img { width:100px; height:100px; object-fit:cover; margin-right:20px; border-radius:10px; }
-.details { flex:1; }
+.details { flex:1; min-width:200px; }
 .details p { margin:5px 0; }
-.qty-controls { display:flex; align-items:center; }
+.qty-controls { display:flex; align-items:center; margin-top:5px; }
 .qty-controls button { padding:5px 10px; margin:0 5px; cursor:pointer; }
-.remove-btn { background:red; color:white; border:none; padding:5px 10px; cursor:pointer; border-radius:5px; }
-.checkout-btn { margin-top:20px; width:100%; padding:10px; background: rgb(94,94,136); color:white; border:none; border-radius:5px; cursor:pointer; }
+.remove-btn { background:red; color:white; border:none; padding:5px 10px; cursor:pointer; border-radius:5px; margin-top:5px; }
+.checkout-btn { margin-top:20px; width:100%; padding:10px; background: rgb(94,94,136); color:white; border:none; border-radius:5px; cursor:pointer; font-size:16px; }
+
+/* Responsive */
+@media(max-width:768px){
+  .cart-item { flex-direction:column; align-items:flex-start; }
+  .cart-item img { margin-bottom:10px; width:100%; height:auto; }
+  .qty-controls { margin-top:10px; }
+}
 </style>
 </head>
 <body>
@@ -50,10 +58,10 @@ function renderCart(){
     const remove=div.querySelector('.remove-btn');
 
     minus.addEventListener('click',()=>{
-      if(item.qty>1){ item.qty--; qtySpan.innerText=item.qty; localStorage.setItem('cart',JSON.stringify(cart)); renderCart(); }
+      if(item.qty>1){ item.qty--; localStorage.setItem('cart',JSON.stringify(cart)); renderCart(); }
     });
     plus.addEventListener('click',()=>{
-      item.qty++; qtySpan.innerText=item.qty; localStorage.setItem('cart',JSON.stringify(cart)); renderCart();
+      item.qty++; localStorage.setItem('cart',JSON.stringify(cart)); renderCart();
     });
     remove.addEventListener('click',()=>{
       cart.splice(index,1);
@@ -64,7 +72,6 @@ function renderCart(){
 }
 
 function goToCheckout(){ window.location='checkout.html'; }
-
 renderCart();
 </script>
 
