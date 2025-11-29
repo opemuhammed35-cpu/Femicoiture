@@ -6,9 +6,20 @@
 <title>Femi Couture</title>
 <style>
 body { font-family: Arial, sans-serif; margin:0; padding:0; }
-header { display:flex; justify-content:space-between; align-items:center; background-color: rgb(94,94,136); color:white; padding:15px; }
-header h1 { margin:0; }
-header nav a { color:white; text-decoration:none; margin-left:15px; }
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background-color: rgb(94,94,136);
+  color:white;
+  padding:15px;
+  flex-wrap:wrap;
+}
+header h1 { margin:0; font-size:28px; }
+header nav a { color:white; text-decoration:none; margin-left:15px; font-size:16px; }
+.search-bar { margin:10px 0; text-align:center; }
+.search-bar input { width:80%; max-width:400px; padding:8px; font-size:16px; border-radius:5px; border:1px solid #ccc; }
+
 .gallery { display:flex; flex-wrap: wrap; margin:20px; justify-content:space-between; }
 .item { width:100%; margin-bottom:20px; border:1px solid #ccc; border-radius:10px; overflow:hidden; padding:10px; box-sizing:border-box; }
 .item img { width:100%; height:250px; object-fit:cover; border-radius:10px; cursor:pointer; }
@@ -20,6 +31,7 @@ header nav a { color:white; text-decoration:none; margin-left:15px; }
 .cart-btn { margin-top:10px; width:100%; padding:10px; background: rgb(94,94,136); color:white; border:none; border-radius:5px; cursor:pointer; }
 @media(min-width:768px){ .item { width:48%; } }
 @media(min-width:1200px){ .item { width:23%; } }
+
 footer { text-align:center; font-family: Arial, Helvetica, sans-serif; padding:20px; background-color:#f5f5f5; border-top:1px solid #ccc; }
 footer .con img { height:50px; width:50px; border-radius:50%; margin:5px; }
 footer .lin a { margin:0 10px; color: rgb(94,94,136); text-decoration:none; font-weight:bold; }
@@ -34,6 +46,10 @@ footer .lin a { margin:0 10px; color: rgb(94,94,136); text-decoration:none; font
     <a href="#foot">Contact</a>
   </nav>
 </header>
+
+<div class="search-bar">
+  <input type="text" id="searchInput" placeholder="Search products...">
+</div>
 
 <main>
   <div class="gallery" id="gallery"></div>
@@ -55,10 +71,10 @@ footer .lin a { margin:0 10px; color: rgb(94,94,136); text-decoration:none; font
 </footer>
 
 <script>
-// PRODUCT LIST
+// PRODUCTS
 const products = [];
 for(let i=1;i<=30;i++){
-  let name = '';
+  let name='';
   switch(i){
     case 1: name='one'; break; case 2: name='two'; break; case 3: name='three'; break;
     case 4: name='four'; break; case 5: name='five'; break; case 6: name='six'; break;
@@ -74,56 +90,65 @@ for(let i=1;i<=30;i++){
   products.push({name,img:`${name}.jpg`,price:90000});
 }
 
-// LOAD GALLERY
 const gallery = document.getElementById('gallery');
-products.forEach((p,i)=>{
-  const div = document.createElement('div');
-  div.classList.add('item');
-  div.innerHTML=`
-    <img src="${p.img}" alt="${p.name}">
-    <h3>${p.name}</h3>
-    <p>₦${p.price.toLocaleString()}</p>
-    <div class="size">
-      <button>S</button><button>M</button><button>L</button><button>XL</button><button>XXL</button>
-    </div>
-    <div class="add">
-      <button class="minus">-</button>
-      <span class="qty">1</span>
-      <button class="plus">+</button>
-    </div>
-    <button class="cart-btn">Add to Cart</button>
-  `;
-  gallery.appendChild(div);
 
-  // SIZE SELECTION
-  const sizeBtns = div.querySelectorAll('.size button');
-  let selectedSize = 'S';
-  sizeBtns.forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      sizeBtns.forEach(b=>b.classList.remove('selected'));
-      btn.classList.add('selected');
-      selectedSize = btn.innerText;
+function displayProducts(list){
+  gallery.innerHTML='';
+  list.forEach((p,i)=>{
+    const div=document.createElement('div');
+    div.classList.add('item');
+    div.innerHTML=`
+      <img src="${p.img}" alt="${p.name}">
+      <h3>${p.name}</h3>
+      <p>₦${p.price.toLocaleString()}</p>
+      <div class="size">
+        <button>S</button><button>M</button><button>L</button><button>XL</button><button>XXL</button>
+      </div>
+      <div class="add">
+        <button class="minus">-</button>
+        <span class="qty">1</span>
+        <button class="plus">+</button>
+      </div>
+      <button class="cart-btn">Add to Cart</button>
+    `;
+    gallery.appendChild(div);
+
+    // SIZE
+    const sizeBtns = div.querySelectorAll('.size button');
+    let selectedSize='S';
+    sizeBtns.forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        sizeBtns.forEach(b=>b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedSize=btn.innerText;
+      });
+    });
+    sizeBtns[0].classList.add('selected');
+
+    // QUANTITY
+    const qtySpan=div.querySelector('.qty');
+    let qty=1;
+    div.querySelector('.plus').addEventListener('click',()=>{ qty++; qtySpan.innerText=qty; });
+    div.querySelector('.minus').addEventListener('click',()=>{ if(qty>1){ qty--; qtySpan.innerText=qty; }});
+
+    // ADD TO CART
+    div.querySelector('.cart-btn').addEventListener('click',()=>{
+      const cart=JSON.parse(localStorage.getItem('cart'))||[];
+      cart.push({name:p.name,img:p.img,price:p.price,qty:qty,size:selectedSize});
+      localStorage.setItem('cart',JSON.stringify(cart));
+      alert(`${p.name} added to cart!`);
     });
   });
-  sizeBtns[0].classList.add('selected'); // default S
+}
 
-  // QUANTITY
-  const qtySpan = div.querySelector('.qty');
-  let qty = 1;
-  div.querySelector('.plus').addEventListener('click',()=>{
-    qty++; qtySpan.innerText=qty;
-  });
-  div.querySelector('.minus').addEventListener('click',()=>{
-    if(qty>1){ qty--; qtySpan.innerText=qty; }
-  });
+// INITIAL DISPLAY
+displayProducts(products);
 
-  // ADD TO CART
-  div.querySelector('.cart-btn').addEventListener('click',()=>{
-    const cart = JSON.parse(localStorage.getItem('cart')) || [];
-    cart.push({name:p.name, img:p.img, price:p.price, qty:qty, size:selectedSize});
-    localStorage.setItem('cart', JSON.stringify(cart));
-    alert(`${p.name} added to cart!`);
-  });
+// SEARCH FUNCTIONALITY
+document.getElementById('searchInput').addEventListener('input',function(){
+  const val=this.value.toLowerCase();
+  const filtered=products.filter(p=>p.name.toLowerCase().includes(val));
+  displayProducts(filtered);
 });
 </script>
 
