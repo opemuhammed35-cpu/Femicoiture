@@ -5,6 +5,28 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 body { font-family: Arial; margin:20px; }
+
+/* Header */
+header { display:flex; justify-content:space-between; align-items:center; background-color: rgb(94,94,136); color:white; padding:15px; flex-wrap:wrap; }
+header .logo { display:flex; align-items:center; gap:10px; }
+header .logo img { height:50px; width:auto; }
+header .logo h1 { margin:0; font-size:28px; }
+header nav { position:relative; }
+header nav .nav-links { display:flex; gap:15px; }
+header nav a { color:white; text-decoration:none; font-size:16px; }
+header nav .hamburger { display:none; font-size:28px; cursor:pointer; }
+@media(max-width:768px){
+  header nav .nav-links { display:none; flex-direction:column; position:absolute; right:0; top:60px; background: rgb(94,94,136); width:150px; border-radius:5px; padding:10px; }
+  header nav .nav-links a { margin:5px 0; }
+  header nav .hamburger { display:block; }
+  header nav .nav-links.active { display:flex; }
+}
+
+/* Bounce animation for cart counter */
+@keyframes bounce { 0%{transform:scale(1);}25%{transform:scale(1.3);}50%{transform:scale(1);}75%{transform:scale(1.2);}100%{transform:scale(1);} }
+#cart-count.bounce { animation:bounce 0.5s ease; display:inline-block; }
+
+/* Cart layout */
 .cart-item { display:flex; align-items:center; margin-bottom:15px; border:1px solid #ccc; padding:10px; border-radius:10px; flex-wrap:wrap; }
 .cart-item img { width:100px; height:100px; object-fit:cover; margin-right:20px; border-radius:10px; }
 .details { flex:1; min-width:200px; }
@@ -12,23 +34,53 @@ body { font-family: Arial; margin:20px; }
 .qty-controls { display:flex; align-items:center; margin-top:5px; }
 .qty-controls button { padding:5px 10px; margin:0 5px; cursor:pointer; }
 .remove-btn { background:red; color:white; border:none; padding:5px 10px; cursor:pointer; border-radius:5px; margin-top:5px; }
-.checkout-btn { margin-top:20px; width:100%; padding:10px; background: rgb(94,94,136); color:white; border:none; border-radius:5px; cursor:pointer; font-size:16px; }
+.checkout-btn { margin-top:20px; width:100%; padding:10px; background: rgb(94,94,136); color:white; border:none; border-radius:5px; cursor:pointer; font-size:16px; position:sticky; bottom:10px; z-index:100; }
 
-/* Responsive */
 @media(max-width:768px){
   .cart-item { flex-direction:column; align-items:flex-start; }
   .cart-item img { margin-bottom:10px; width:100%; height:auto; }
   .qty-controls { margin-top:10px; }
+  .checkout-btn { font-size:18px; padding:12px; }
 }
 </style>
 </head>
 <body>
+
+<header>
+  <div class="logo">
+    <img src="logo.png" alt="Femi Couture Logo">
+    <h1>Femi Couture</h1>
+  </div>
+  <nav>
+    <div class="hamburger" onclick="toggleMenu()">☰</div>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="cart.html">Cart (<span id="cart-count">0</span>)</a>
+    </div>
+  </nav>
+</header>
 
 <h2>Your Cart</h2>
 <div id="cart-container"></div>
 <button class="checkout-btn" onclick="goToCheckout()">Proceed to Checkout</button>
 
 <script>
+// Hamburger menu
+function toggleMenu() {
+  const navLinks = document.querySelector('header nav .nav-links');
+  navLinks.classList.toggle('active');
+}
+
+// Cart counter
+function updateCartCount(){
+  const cart = JSON.parse(localStorage.getItem('cart')) || [];
+  const count = cart.reduce((acc,item)=>acc+item.qty,0);
+  const counter=document.getElementById('cart-count');
+  counter.innerText=count;
+  counter.classList.remove('bounce'); void counter.offsetWidth; counter.classList.add('bounce');
+}
+
+// Render cart
 function renderCart(){
   const container=document.getElementById('cart-container');
   const cart=JSON.parse(localStorage.getItem('cart'))||[];
@@ -36,42 +88,55 @@ function renderCart(){
   cart.forEach((item,index)=>{
     const div=document.createElement('div');
     div.className='cart-item';
-    div.innerHTML=`
-      <img src="${item.img}" alt="${item.name}">
-      <div class="details">
-        <p><strong>${item.name}</strong></p>
-        <p>Size: ${item.size}</p>
-        <div class="qty-controls">
-          <button class="minus">-</button>
-          <span class="qty">${item.qty}</span>
-          <button class="plus">+</button>
-        </div>
-        <p>₦${(item.price*item.qty).toLocaleString()}</p>
-        <button class="remove-btn">Remove</button>
+
+    // Image with jpg->jpeg fallback
+    const imgEl = document.createElement('img');
+    imgEl.src = item.img;
+    imgEl.alt = item.name;
+    imgEl.onerror = () => { imgEl.src = item.img.replace(/\.jpg$/i,'.jpeg'); };
+
+    const details = document.createElement('div');
+    details.className = 'details';
+    details.innerHTML = `
+      <p><strong>${item.name}</strong></p>
+      <p>Size: ${item.size}</p>
+      <div class="qty-controls">
+        <button class="minus">-</button>
+        <span class="qty">${item.qty}</span>
+        <button class="plus">+</button>
       </div>
+      <p>₦${(item.price*item.qty).toLocaleString()}</p>
+      <button class="remove-btn">Remove</button>
     `;
+
+    div.appendChild(imgEl);
+    div.appendChild(details);
     container.appendChild(div);
 
-    const minus=div.querySelector('.minus');
-    const plus=div.querySelector('.plus');
-    const qtySpan=div.querySelector('.qty');
-    const remove=div.querySelector('.remove-btn');
+    const minus=details.querySelector('.minus');
+    const plus=details.querySelector('.plus');
+    const qtySpan=details.querySelector('.qty');
+    const remove=details.querySelector('.remove-btn');
 
     minus.addEventListener('click',()=>{
-      if(item.qty>1){ item.qty--; localStorage.setItem('cart',JSON.stringify(cart)); renderCart(); }
+      if(item.qty>1){ item.qty--; localStorage.setItem('cart',JSON.stringify(cart)); renderCart(); updateCartCount(); }
     });
     plus.addEventListener('click',()=>{
-      item.qty++; localStorage.setItem('cart',JSON.stringify(cart)); renderCart();
+      item.qty++; localStorage.setItem('cart',JSON.stringify(cart)); renderCart(); updateCartCount();
     });
     remove.addEventListener('click',()=>{
       cart.splice(index,1);
       localStorage.setItem('cart',JSON.stringify(cart));
-      renderCart();
+      renderCart(); updateCartCount();
     });
   });
 }
 
 function goToCheckout(){ window.location='checkout.html'; }
+
+window.addEventListener('storage', updateCartCount);
+
+updateCartCount();
 renderCart();
 </script>
 
