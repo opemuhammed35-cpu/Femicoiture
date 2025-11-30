@@ -5,6 +5,28 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 body { font-family: Arial; margin:20px; }
+
+/* Header */
+header { display:flex; justify-content:space-between; align-items:center; background-color: rgb(94,94,136); color:white; padding:15px; flex-wrap:wrap; }
+header .logo { display:flex; align-items:center; gap:10px; }
+header .logo img { height:50px; width:auto; }
+header .logo h1 { margin:0; font-size:28px; }
+header nav { position:relative; }
+header nav .nav-links { display:flex; gap:15px; }
+header nav a { color:white; text-decoration:none; font-size:16px; }
+header nav .hamburger { display:none; font-size:28px; cursor:pointer; }
+@media(max-width:768px){
+  header nav .nav-links { display:none; flex-direction:column; position:absolute; right:0; top:60px; background: rgb(94,94,136); width:150px; border-radius:5px; padding:10px; }
+  header nav .nav-links a { margin:5px 0; }
+  header nav .hamburger { display:block; }
+  header nav .nav-links.active { display:flex; }
+}
+
+/* Bounce animation for cart counter */
+@keyframes bounce { 0%{transform:scale(1);}25%{transform:scale(1.3);}50%{transform:scale(1);}75%{transform:scale(1.2);}100%{transform:scale(1);} }
+#cart-count.bounce { animation:bounce 0.5s ease; display:inline-block; }
+
+/* Order summary */
 .order-summary { max-width:600px; margin:0 auto; padding:20px; border:1px solid #ccc; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1); }
 .order-item { display:flex; margin-bottom:15px; flex-wrap:wrap; border-bottom:1px solid #eee; padding-bottom:10px; }
 .order-item img { width:100px; height:100px; object-fit:cover; border-radius:10px; margin-right:20px; }
@@ -25,27 +47,66 @@ body { font-family: Arial; margin:20px; }
 </head>
 <body>
 
+<header>
+  <div class="logo">
+    <img src="logo.png" alt="Femi Couture Logo">
+    <h1>Femi Couture</h1>
+  </div>
+  <nav>
+    <div class="hamburger" onclick="toggleMenu()">☰</div>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="cart.html">Cart (<span id="cart-count">0</span>)</a>
+    </div>
+  </nav>
+</header>
+
 <h2>Checkout</h2>
 <div class="order-summary" id="order-summary"></div>
 
 <script>
+// Hamburger menu
+function toggleMenu() {
+  const navLinks = document.querySelector('header nav .nav-links');
+  navLinks.classList.toggle('active');
+}
+
+// Cart counter
+function updateCartCount(){
+  const cart = JSON.parse(localStorage.getItem('cart')) || [];
+  const count = cart.reduce((acc,item)=>acc+item.qty,0);
+  const counter=document.getElementById('cart-count');
+  counter.innerText=count;
+  counter.classList.remove('bounce'); void counter.offsetWidth; counter.classList.add('bounce');
+}
+
+// Render checkout
 const cart = JSON.parse(localStorage.getItem('cart')) || [];
 const summary = document.getElementById('order-summary');
 let total = 0;
 
 cart.forEach(item=>{
   total += item.price*item.qty;
+
   const div=document.createElement('div');
   div.classList.add('order-item');
-  div.innerHTML=`
-    <img src="${item.img}" alt="${item.name}">
-    <div class="order-details">
-      <p><strong>${item.name}</strong></p>
-      <p>Size: ${item.size}</p>
-      <p>Qty: ${item.qty}</p>
-      <p>Price: ₦${(item.price*item.qty).toLocaleString()}</p>
-    </div>
+
+  // Image with jpg->jpeg fallback
+  const imgEl = document.createElement('img');
+  imgEl.src = item.img;
+  imgEl.alt = item.name;
+  imgEl.onerror = () => { imgEl.src = item.img.replace(/\.jpg$/i,'.jpeg'); };
+  div.appendChild(imgEl);
+
+  const details = document.createElement('div');
+  details.className='order-details';
+  details.innerHTML = `
+    <p><strong>${item.name}</strong></p>
+    <p>Size: ${item.size}</p>
+    <p>Qty: ${item.qty}</p>
+    <p>Price: ₦${(item.price*item.qty).toLocaleString()}</p>
   `;
+  div.appendChild(details);
   summary.appendChild(div);
 });
 
@@ -61,9 +122,19 @@ payDiv.innerHTML=`
   <input type="radio" name="pay" id="paystack"><label for="paystack">Paystack</label><br>
   <input type="radio" name="pay" id="flutterwave"><label for="flutterwave">Flutterwave</label><br>
   <input type="radio" name="pay" id="bank"><label for="bank">Bank Transfer</label><br>
-  <button class="place-order">Place Order</button>
+  <button class="place-order" onclick="placeOrder()">Place Order</button>
 `;
 summary.appendChild(payDiv);
+
+function placeOrder(){
+  alert('Order placed successfully!');
+  localStorage.removeItem('cart');
+  updateCartCount();
+  window.location='index.html';
+}
+
+updateCartCount();
+window.addEventListener('storage', updateCartCount);
 </script>
 
 </body>
