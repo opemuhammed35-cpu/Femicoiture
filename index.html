@@ -6,9 +6,30 @@
 <title>Femi Couture - Shop</title>
 <style>
 body { font-family: Arial; margin:0; padding:0; }
+
+/* Header */
 header { display:flex; justify-content:space-between; align-items:center; background-color: rgb(94,94,136); color:white; padding:15px; flex-wrap:wrap; }
-header h1 { margin:0; font-size:28px; }
-header nav a { color:white; text-decoration:none; margin-left:15px; font-size:16px; }
+header .logo { display:flex; align-items:center; gap:10px; }
+header .logo img { height:50px; width:auto; }
+header .logo h1 { margin:0; font-size:28px; }
+header nav { position:relative; }
+header nav .nav-links { display:flex; gap:15px; }
+header nav a { color:white; text-decoration:none; font-size:16px; }
+header nav .hamburger { display:none; font-size:28px; cursor:pointer; }
+
+/* Bounce animation for cart counter */
+@keyframes bounce { 0%{transform:scale(1);}25%{transform:scale(1.3);}50%{transform:scale(1);}75%{transform:scale(1.2);}100%{transform:scale(1);} }
+#cart-count.bounce { animation: bounce 0.5s ease; display:inline-block; }
+
+/* Responsive header */
+@media(max-width:768px){
+  header nav .nav-links { display:none; flex-direction:column; position:absolute; right:0; top:60px; background: rgb(94,94,136); width:150px; border-radius:5px; padding:10px; }
+  header nav .nav-links a { margin:5px 0; }
+  header nav .hamburger { display:block; }
+  header nav .nav-links.active { display:flex; }
+}
+
+/* Search and gallery */
 .search-bar { margin:10px 0; text-align:center; }
 .search-bar input { width:80%; max-width:400px; padding:8px; font-size:16px; border-radius:5px; border:1px solid #ccc; }
 .gallery { display:flex; flex-wrap: wrap; margin:20px; justify-content:space-between; }
@@ -25,7 +46,7 @@ header nav a { color:white; text-decoration:none; margin-left:15px; font-size:16
 .cart-btn { margin-top:10px; width:100%; padding:10px; background: rgb(94,94,136); color:white; border:none; border-radius:5px; cursor:pointer; font-size:16px; }
 footer { text-align:center; font-family: Arial, Helvetica, sans-serif; padding:20px; background-color:#f5f5f5; border-top:1px solid #ccc; }
 
-/* Responsive */
+/* Gallery widths */
 @media(min-width:600px){ .item { width:48%; } }
 @media(min-width:992px){ .item { width:31%; } }
 @media(min-width:1200px){ .item { width:23%; } }
@@ -34,10 +55,16 @@ footer { text-align:center; font-family: Arial, Helvetica, sans-serif; padding:2
 <body>
 
 <header>
-  <h1>Femi Couture</h1>
+  <div class="logo">
+    <img src="logo.png" alt="Femi Couture Logo">
+    <h1>Femi Couture</h1>
+  </div>
   <nav>
-    <a href="#">Home</a>
-    <a href="cart.html">Cart</a>
+    <div class="hamburger" onclick="toggleMenu()">☰</div>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="cart.html">Cart (<span id="cart-count">0</span>)</a>
+    </div>
   </nav>
 </header>
 
@@ -52,7 +79,13 @@ footer { text-align:center; font-family: Arial, Helvetica, sans-serif; padding:2
 <footer>Femi Couture &copy; 2025</footer>
 
 <script>
-// PRODUCTS
+// Hamburger menu
+function toggleMenu() {
+  const navLinks = document.querySelector('header nav .nav-links');
+  navLinks.classList.toggle('active');
+}
+
+// Products
 const products=[];
 const names=[
 'one','two','three','four','five','six','seven','eight','nine','ten',
@@ -63,13 +96,21 @@ names.forEach(name=>products.push({name,img:`${name}.jpg`,price:90000}));
 
 const gallery=document.getElementById('gallery');
 
+// Display products
 function displayProducts(list){
   gallery.innerHTML='';
   list.forEach(p=>{
     const div=document.createElement('div');
     div.classList.add('item');
-    div.innerHTML=`
-      <img src="${p.img}" alt="${p.name}">
+
+    // Image with jpg -> jpeg fallback
+    const imgEl = document.createElement('img');
+    imgEl.alt = p.name;
+    imgEl.src = p.img;
+    imgEl.onerror = function() { imgEl.src = p.img.replace(/\.jpg$/i, '.jpeg'); };
+    div.appendChild(imgEl);
+
+    div.innerHTML += `
       <h3>${p.name}</h3>
       <p>₦${p.price.toLocaleString()}</p>
       <div class="size">
@@ -82,6 +123,7 @@ function displayProducts(list){
       </div>
       <button class="cart-btn">Add to Cart</button>
     `;
+
     gallery.appendChild(div);
 
     const sizeBtns=div.querySelectorAll('.size button');
@@ -104,19 +146,32 @@ function displayProducts(list){
       const cart=JSON.parse(localStorage.getItem('cart'))||[];
       cart.push({name:p.name,img:p.img,price:p.price,qty:qty,size:selectedSize});
       localStorage.setItem('cart',JSON.stringify(cart));
+      updateCartCount(); // bounce
       alert(`${p.name} added to cart!`);
     });
   });
 }
 
-displayProducts(products);
-
+// Search
 document.getElementById('searchInput').addEventListener('input',function(){
   const val=this.value.toLowerCase();
   const filtered=products.filter(p=>p.name.toLowerCase().includes(val));
   displayProducts(filtered);
 });
-</script>
 
+// Cart counter
+function updateCartCount(){
+  const cart = JSON.parse(localStorage.getItem('cart')) || [];
+  const count = cart.reduce((acc,item)=>acc+item.qty,0);
+  const counter = document.getElementById('cart-count');
+  counter.innerText = count;
+  counter.classList.remove('bounce'); void counter.offsetWidth; counter.classList.add('bounce');
+}
+
+updateCartCount();
+window.addEventListener('storage', updateCartCount);
+
+displayProducts(products);
+</script>
 </body>
 </html>
