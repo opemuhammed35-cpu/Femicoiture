@@ -6,7 +6,6 @@
 <title>Femi Couture - Shop</title>
 <style>
 body { font-family: Arial; margin:0; padding:0; }
-
 /* Header */
 header { display:flex; justify-content:space-between; align-items:center; background-color: rgb(94,94,136); color:white; padding:15px; flex-wrap:wrap; }
 header .logo { display:flex; align-items:center; gap:10px; }
@@ -16,11 +15,9 @@ header nav { position:relative; }
 header nav .nav-links { display:flex; gap:15px; }
 header nav a { color:white; text-decoration:none; font-size:16px; }
 header nav .hamburger { display:none; font-size:28px; cursor:pointer; }
-
 /* Bounce animation for cart counter */
 @keyframes bounce { 0%{transform:scale(1);}25%{transform:scale(1.3);}50%{transform:scale(1);}75%{transform:scale(1.2);}100%{transform:scale(1);} }
 #cart-count.bounce { animation: bounce 0.5s ease; display:inline-block; }
-
 /* Responsive header */
 @media(max-width:768px){
   header nav .nav-links { display:none; flex-direction:column; position:absolute; right:0; top:60px; background: rgb(94,94,136); width:150px; border-radius:5px; padding:10px; }
@@ -28,7 +25,6 @@ header nav .hamburger { display:none; font-size:28px; cursor:pointer; }
   header nav .hamburger { display:block; }
   header nav .nav-links.active { display:flex; }
 }
-
 /* Search and gallery */
 .search-bar { margin:10px 0; text-align:center; }
 .search-bar input { width:80%; max-width:400px; padding:8px; font-size:16px; border-radius:5px; border:1px solid #ccc; }
@@ -45,7 +41,6 @@ header nav .hamburger { display:none; font-size:28px; cursor:pointer; }
 .qty { margin:0 10px; font-size:16px; }
 .cart-btn { margin-top:10px; width:100%; padding:10px; background: rgb(94,94,136); color:white; border:none; border-radius:5px; cursor:pointer; font-size:16px; }
 footer { text-align:center; font-family: Arial, Helvetica, sans-serif; padding:20px; background-color:#f5f5f5; border-top:1px solid #ccc; }
-
 /* Gallery widths */
 @media(min-width:600px){ .item { width:48%; } }
 @media(min-width:992px){ .item { width:31%; } }
@@ -81,8 +76,16 @@ footer { text-align:center; font-family: Arial, Helvetica, sans-serif; padding:2
 <script>
 // Hamburger menu
 function toggleMenu() {
-  const navLinks = document.querySelector('header nav .nav-links');
-  navLinks.classList.toggle('active');
+  document.querySelector('header nav .nav-links').classList.toggle('active');
+}
+
+// Cart counter
+function updateCartCount(){
+  const cart = JSON.parse(localStorage.getItem('cart')) || [];
+  const count = cart.reduce((acc,item)=>acc+item.qty,0);
+  const counter = document.getElementById('cart-count');
+  counter.innerText = count;
+  counter.classList.remove('bounce'); void counter.offsetWidth; counter.classList.add('bounce');
 }
 
 // Products
@@ -96,14 +99,12 @@ names.forEach(name=>products.push({name,img:`${name}.jpg`,price:90000}));
 
 const gallery=document.getElementById('gallery');
 
-// Display products
 function displayProducts(list){
   gallery.innerHTML='';
   list.forEach(p=>{
     const div=document.createElement('div');
     div.classList.add('item');
 
-    // Image with jpg -> jpeg fallback
     const imgEl = document.createElement('img');
     imgEl.alt = p.name;
     imgEl.src = p.img;
@@ -146,7 +147,7 @@ function displayProducts(list){
       const cart=JSON.parse(localStorage.getItem('cart'))||[];
       cart.push({name:p.name,img:p.img,price:p.price,qty:qty,size:selectedSize});
       localStorage.setItem('cart',JSON.stringify(cart));
-      updateCartCount(); // bounce
+      updateCartCount();
       alert(`${p.name} added to cart!`);
     });
   });
@@ -159,19 +160,10 @@ document.getElementById('searchInput').addEventListener('input',function(){
   displayProducts(filtered);
 });
 
-// Cart counter
-function updateCartCount(){
-  const cart = JSON.parse(localStorage.getItem('cart')) || [];
-  const count = cart.reduce((acc,item)=>acc+item.qty,0);
-  const counter = document.getElementById('cart-count');
-  counter.innerText = count;
-  counter.classList.remove('bounce'); void counter.offsetWidth; counter.classList.add('bounce');
-}
-
 updateCartCount();
-window.addEventListener('storage', updateCartCount);
-
 displayProducts(products);
+window.addEventListener('storage', updateCartCount);
 </script>
+
 </body>
 </html>
