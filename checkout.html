@@ -50,65 +50,60 @@ body { font-family: Arial; margin:20px; }
 </form>
 </div>
 
-<script type="module">
-import { db, collection, addDoc } from './js/firebase-config.js';
-
-document.getElementById('checkout-form').addEventListener('submit', async function(e){
+<script>
+document.getElementById("checkout-form").addEventListener("submit", async function(e) {
   e.preventDefault();
 
-  const cart = JSON.parse(localStorage.getItem('cart')) || [];
-  if(cart.length === 0){
+  const cart = JSON.parse(localStorage.getItem("cart")) || [];
+  if (cart.length === 0) {
     alert("Your cart is empty!");
     return;
   }
 
-  const totalAmount = cart.reduce((acc, item) => acc + item.price*item.qty, 0);
+  const totalAmount = cart.reduce((acc, item) => acc + item.price * item.qty, 0);
 
-  // Paystack Payment
-  const handler = PaystackPop.setup({
-    key: 'YOUR_PAYSTACK_PUBLIC_KEY', // replace with your Paystack public key
-    email: document.getElementById('email').value,
-    amount: totalAmount * 100, // in kobo
-    currency: "NGN",
-    firstname: document.getElementById('fname').value,
-    lastname: document.getElementById('lname').value,
-    phone: document.getElementById('phone').value,
-    callback: async function(response){
-      try{
-        // Save order to Firebase
-        await addDoc(collection(db, "orders"), {
-          Timestamp: new Date().toLocaleString(),
-          "First Name": document.getElementById('fname').value,
-          "Last Name": document.getElementById('lname').value,
-          Email: document.getElementById('email').value,
-          Phone: document.getElementById('phone').value,
-          Country: document.getElementById('country').value,
-          Address: document.getElementById('address').value,
-          State: document.getElementById('state').value,
-          City: document.getElementById('city').value,
-          "Additional Info": document.getElementById('additional').value,
-          "Cart Details": JSON.stringify(cart),
-          Total: totalAmount,
-          "Payment Reference": response.reference
-        });
-
-        alert("Payment successful! Your order has been saved.");
-        localStorage.removeItem('cart');
-        window.location = 'index.html';
-
-      } catch (err) {
-        console.error(err);
-        alert("Order could not be saved. Please contact support.");
-      }
+  const orderData = {
+    customer: {
+      fname: document.getElementById("fname").value,
+      lname: document.getElementById("lname").value,
+      email: document.getElementById("email").value,
+      phone: document.getElementById("phone").value,
+      country: document.getElementById("country").value,
+      state: document.getElementById("state").value,
+      city: document.getElementById("city").value,
+      address: document.getElementById("address").value,
+      additional: document.getElementById("additional").value
     },
-    onClose: function(){
-      alert('Payment was not completed.');
+    cart
+  };
+
+  try {
+    const res = await fetch("/api/initialize", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: orderData.customer.email,
+        amount: totalAmount,
+        orderData
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.status && data.data.authorization_url) {
+      // Redirect user to Paystack
+      window.location.href = data.data.authorization_url;
+    } else {
+      console.error(data);
+      alert("Could not initialize payment. Please try again.");
     }
-  });
-  handler.openIframe();
+
+  } catch (err) {
+    console.error(err);
+    alert("Something went wrong. Check console.");
+  }
 });
 </script>
 
-<script src="https://js.paystack.co/v1/inline.js"></script>
 </body>
 </html>
